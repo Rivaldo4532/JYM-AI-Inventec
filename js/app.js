@@ -1,53 +1,55 @@
 
-// JYM AI - Interface Prototype
-// Not connected to Inventec production systems.
+// ==========================================
+// JYM AI - INVENTEC PSG
+// Interface Demonstration Prototype
+// No SQL Server / HPIMES connection
+// ==========================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
     // ==========================================
-    // LOGIN
+    // LOGIN - DEMONSTRATION MODE
     // ==========================================
 
     const loginForm = document.getElementById("loginForm");
 
     if (loginForm) {
 
-        const password = document.getElementById("password");
-        const toggle = document.getElementById("togglePassword");
+        const employeeId = document.getElementById("username");
         const error = document.getElementById("loginError");
-
-        if (toggle && password) {
-
-            toggle.addEventListener("click", () => {
-
-                const showing = password.type === "text";
-
-                password.type = showing ? "password" : "text";
-                toggle.textContent = showing ? "Show" : "Hide";
-
-            });
-
-        }
 
         loginForm.addEventListener("submit", (event) => {
 
             event.preventDefault();
 
-            const username = document.getElementById("username").value.trim();
+            const clockNumber = employeeId
+                ? employeeId.value.trim()
+                : "";
 
-            if (username === "admin" && password.value === "Karen2026!") {
-
-                sessionStorage.setItem("jymDemoUser", "admin");
-
-                window.location.href = "dashboard.html";
-
-            } else {
+            if (!clockNumber) {
 
                 if (error) {
-                    error.textContent = "Incorrect username or password. Please check your credentials.";
+                    error.textContent = "Please enter your Employee ID.";
                 }
 
+                return;
             }
+
+            // Save demonstration session
+            sessionStorage.setItem("jymDemoUser", clockNumber);
+            sessionStorage.setItem("jymDemoMode", "true");
+
+            if (error) {
+                error.textContent = "";
+            }
+
+            // Redirect to dashboard (GitHub Pages compatible)
+            const basePath = window.location.pathname.substring(
+                0,
+                window.location.pathname.lastIndexOf("/") + 1
+            );
+
+            window.location.assign(basePath + "dashboard.html");
 
         });
 
@@ -73,6 +75,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // ==========================================
+    // DASHBOARD - EMPLOYEE INFORMATION
+    // ==========================================
+
+    const currentEmployee = sessionStorage.getItem("jymDemoUser");
+
+    const userInfo = document.querySelector(".user-info");
+
+    if (currentEmployee && userInfo) {
+
+        const name = userInfo.querySelector("b");
+        const role = userInfo.querySelector("small");
+
+        if (name) {
+            name.textContent = "Employee " + currentEmployee;
+        }
+
+        if (role) {
+            role.textContent = "Demo session";
+        }
+
+    }
+
+
+    // ==========================================
     // JYM AI - ASSISTANT
     // ==========================================
 
@@ -83,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const input = document.getElementById("chatInput");
         const response = document.getElementById("chatResponse");
 
-        // Demonstration responses.
+        // Demonstration responses
         const answer = (question) => {
 
             const q = question.toLowerCase();
@@ -93,7 +119,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 q.includes("line") ||
                 q.includes("production issue")
             ) {
-                return "I can help identify production delays by line, station, or area. Currently, the Dashboard data is illustrative and is not connected to Inventec production systems.";
+
+                return "I can help identify production delays by line, station, or area. However, live production records are not available because SQL Server and HPIMES are not connected.";
+
             }
 
             if (
@@ -101,7 +129,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 q.includes("pending") ||
                 q.includes("package")
             ) {
-                return "I can help review pending packaging activities. The quantity displayed on the Dashboard is for demonstration purposes and does not represent actual Inventec data.";
+
+                return "I can help review pending packaging activities. Actual quantities cannot be verified until an authorized production database is connected.";
+
             }
 
             if (
@@ -109,7 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 q.includes("production") ||
                 q.includes("output")
             ) {
-                return "I can help analyze production by shift, line, or station. This version is not connected to SQL Server or HPIMES.";
+
+                return "I can help analyze production by shift, line, or station. This prototype currently has no access to live SQL Server or HPIMES records.";
+
             }
 
             if (
@@ -117,7 +149,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 q.includes("defect") ||
                 q.includes("rejection")
             ) {
-                return "I can help analyze quality indicators, defects, and rejection rates. Access to authorized production data will be required to provide actual results.";
+
+                return "I can help analyze quality indicators, defects, and rejection rates. Access to authorized production records is required to provide actual results.";
+
             }
 
             if (
@@ -126,20 +160,41 @@ document.addEventListener("DOMContentLoaded", () => {
                 q.includes("good morning") ||
                 q.includes("good afternoon")
             ) {
+
                 return "Hello! I'm JYM AI, your production intelligence assistant. How can I help you today?";
+
             }
 
-            return "I'm here to help. You can ask me about production, shifts, lines, quality, or pending packaging activities. Please note that this prototype is not connected to a live AI service or SQL Server.";
+            if (
+                q.includes("database") ||
+                q.includes("sql server") ||
+                q.includes("hpimes") ||
+                q.includes("connection")
+            ) {
+
+                return "The current prototype is not connected to SQL Server, HPIMES, or a backend API. Database integration will be configured in a future development stage.";
+
+            }
+
+            return "I'm here to help you explore production topics, shifts, lines, quality, and packaging. Please note that this prototype is not connected to a live AI service or production database.";
+
         };
 
 
-        // Safely create chat messages.
+        // ==========================================
+        // CHAT MESSAGE CREATION
+        // ==========================================
+
         const addMessage = (text, type) => {
+
+            if (!response) return;
 
             const message = document.createElement("div");
 
             message.className =
-                type === "user" ? "user-message" : "assistant-message";
+                type === "user"
+                    ? "user-message"
+                    : "assistant-message";
 
             if (type === "assistant") {
 
@@ -183,7 +238,10 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
 
-        // Send a question.
+        // ==========================================
+        // SEND MESSAGE
+        // ==========================================
+
         const send = (question) => {
 
             const clean = question.trim();
@@ -192,7 +250,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             addMessage(clean, "user");
 
-            input.value = "";
+            if (input) {
+                input.value = "";
+            }
 
             setTimeout(() => {
 
@@ -203,17 +263,19 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
 
-        // Chat form submission.
+        // Chat form
         chatForm.addEventListener("submit", (event) => {
 
             event.preventDefault();
 
-            send(input.value);
+            if (input) {
+                send(input.value);
+            }
 
         });
 
 
-        // Suggested questions.
+        // Suggested questions
         document.querySelectorAll("[data-question]").forEach(button => {
 
             button.addEventListener("click", () => {
@@ -239,7 +301,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!SpeechRecognition) {
 
-                mic.title = "Voice recognition is not supported in this browser";
+                mic.title =
+                    "Voice recognition is not supported in this browser";
 
                 mic.addEventListener("click", () => {
 
@@ -269,19 +332,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     } catch (error) {
 
-                        console.log("Voice recognition is already active.");
+                        console.log(
+                            "Voice recognition is already active."
+                        );
 
                     }
 
                 });
 
+
                 recognition.onresult = (event) => {
 
-                    input.value = event.results[0][0].transcript;
+                    if (input) {
 
-                    input.focus();
+                        input.value =
+                            event.results[0][0].transcript;
+
+                        input.focus();
+
+                    }
 
                 };
+
 
                 recognition.onend = () => {
 
@@ -290,7 +362,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 };
 
+
                 recognition.onerror = () => {
+
+                    mic.classList.remove("listening");
+                    mic.textContent = "♩";
 
                     addMessage(
                         "Voice recognition failed. Please try again or type your question.",
